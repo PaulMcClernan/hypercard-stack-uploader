@@ -1,0 +1,79 @@
+
+-------------------------------- begin OpenXTalk additions -----------------------------------------------------------------
+function userAgent
+-- full userAgent info:
+return window.navigator.userAgent;
+end userAgent
+
+function userLanguage
+return navigator.language;
+end userLanguage
+
+function isOnline
+return navigator.onLine;
+end isOnline
+
+function platform
+return navigator.platform;
+end platform
+
+-- you can get or set properties
+on setBackDrop pColor
+result = document.body.style.background = pColor ;
+end setBackDrop
+
+function backDrop
+return document.body.style.background;
+end backDrop
+
+function gamePadAPIAvailable
+return ("gamepad" in navigator)
+end gamePadAPIAvailable
+
+function webMIDIAvailable
+-- return ('midi' in navigator);
+if(typeof(window.requestMIDIAccess)!="undefined"){
+     return false
+}else{
+     return true
+}
+end webMIDIAvailable
+
+function isFileReaderAvailable
+if('FileReader' in window);
+  console.log('FileReader found');
+else
+  console.log('FileReader not found');
+end if
+end isFileReaderAvailable
+
+on launchURL pURL
+put char 1 to 8 of pURL into tTemp
+if tTemp contains "https://" then
+  var a = document.createElement('a');
+  a.href = encodeURI(pURL);
+  a.click();
+else
+   put "https://" before pURL
+   var a = document.createElement('a');
+   a.href = encodeURI(pURL);
+   a.click();
+end if
+end launchURL
+
+function systemAppearance
+-- check for darkMode:
+if the darkMode is true then
+   return "dark"
+else
+   return "light"
+end if
+end systemAppearance
+
+function darkMode
+return window.matchMedia('(prefers-color-scheme:dark)').matches;
+end darkMode
+
+-- basic clipboard write access:-- result = navigator.clipboard.writeText("Hello Clipboard!");
+--- get our console-like text area (in the OXT Emscripten Engine wrapper webpage):-- result = document.getElementById('output').value;
+--------------------------------- end OpenXTalk additions ---------------------------------
