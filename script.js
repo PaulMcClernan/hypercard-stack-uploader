@@ -1,16 +1,16 @@
-/* (c) 2022 Hypervariety Custom Software. All rights reserved. Packaged 2023-01-01 07:25:36 */ 
+/* (c) 2022 Hypervariety Custom Software. All rights reserved. Packaged 2023-01-01 07:25:36 */
 
-/* 
-	
+/*
+
 	LICENSE:
 	This file was developed ©2022 Hypervariety Custom Software, LLC. There is no warranty of any kind expressed or implied.
 	THIS FILE IS OPEN SOURCE. YOU CAN COPY AND RUN THIS FILE YOURSELF AND LEARN PROGRAMMING TECHNIQUES FROM IT.
-	Although the code is not very well-written or pretty, in the interests of public discourse, I am making it available for view. 
-	
+	Although the code is not very well-written or pretty, in the interests of public discourse, I am making it available for view.
+
 	THANK YOU TO THE RETRO-HACKERS WHO FIGURED OUT THE HC STACK FORMAT.
-	
+
 	This script accompanies the stack importer at https://github.com/hyperhello/hypercard-stack-uploader
-	
+
 */
 "use strict";
 
@@ -2019,6 +2019,83 @@ return value.substring(start,end);
 XTalk.DefaultMainScript = `
 
 -- Messages are sent to buttons, fields, cards, backgrounds, and stacks. The targets can catch them in script handlers. If they are not caught, they are sent down the message path to their containing cards and backgrounds, and then the stack.
+
+-------------------------------- begin OpenXTalk additions -----------------------------------------------------------------
+
+function userAgent
+-- full userAgent info:
+return window.navigator.userAgent;
+end userAgent
+
+function userLanguage
+return navigator.language;
+end userLanguage
+
+function platform
+--- var thePlatform = navigator.platform;
+--- if char 1 to 3 of thePlatform = "Mac" then
+--- return "MacOS"
+--- end if
+--- if thePlatform is "iPhone" or thePlatform is "iPad" or thePlatform is "iPod"  then
+--- return "iOS"
+--- end if
+--- if char 1 to 3 of thePlatform = "Win" then
+--- return "Windows"
+--- end if
+return navigator.platform;
+end platform
+
+-- you can get or set properties
+on setBackDrop pColor
+result = document.body.style.background = pColor ;
+end setBackDrop
+
+function backDrop
+return document.body.style.background;
+end backDrop
+
+function gamePadAPIAvailable
+return ("gamepad" in navigator)
+end gamePadAPIAvailable
+
+function webMIDIAvailable
+return ("midi" in navigator);
+end webMIDIAvailable
+
+on launchURL pURL
+put char 1 to 8 of pURL into tTemp
+if tTemp contains "https://" then
+var a = document.createElement('a');
+a.href = encodeURI(pURL);
+a.click();
+else
+put "https://" before pURL
+var a = document.createElement('a');
+a.href = encodeURI(pURL);
+a.click();
+end if
+end launchURL
+
+function systemAppearance
+-- check for darkMode:
+if the darkMode is true then
+return "dark"
+else
+return "light"
+end if
+end systemAppearance
+
+function darkMode
+return window.matchMedia('(prefers-color-scheme:dark)').matches;
+end darkMode
+
+-- basic clipboard write access:
+-- result = navigator.clipboard.writeText("Hello Clipboard!");
+
+--- get our console-like text area (in the OXT Emscripten Engine wrapper webpage):
+-- result = document.getElementById('output').value;
+
+--------------------------------- end OpenXTalk additions ---------------------------------
 
 -- when the mouse (or finger) is pressed in the stack:
 
