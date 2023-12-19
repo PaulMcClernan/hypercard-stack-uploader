@@ -27,7 +27,7 @@ return document.body.style.background;
 end backDrop
 
 function gamePadAPIAvailable
-return ("gamepad" in navigator)
+return ('getGamepads' in navigator);
 end gamePadAPIAvailable
 
 function webMIDIAvailable
@@ -38,6 +38,25 @@ if(typeof(window.requestMIDIAccess)!="undefined"){
      return true
 }
 end webMIDIAvailable
+
+function webMIDIAvailable
+    return ('requestMIDIAccess' in navigator);
+if(typeof(window.requestMIDIAccess)!="undefined"){
+     return false
+}else{
+     return true
+}
+end webMIDIAvailable
+
+function tinySynthAvailable
+return ('WebAudioTinySynth' in navigator);
+
+if(typeof(window.WebAudioTinySynth)!="undefined"){
+     return false
+}else{
+     return true
+}
+end tinySynthAvailable
 
 function isFileReaderAvailable
 if('FileReader' in window);

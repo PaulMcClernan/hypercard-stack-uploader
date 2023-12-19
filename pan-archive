@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+		<!--base href="https://hcsimulator.com"-->
+		<title></title>
+		<!--script src=https://hcsimulator.com/script.js></script-->
+		<!--script src=https://openxtalk.org/WebStacks/script.js></script-->
+		<script src=script.js></script>
+		<script src=https://hcsimulator.com/pantechnicon-links.js></script>
+
+		<style>
+			div.linktostack {
+				clear:both;
+			}
+			div.linktostack > div.details > a {
+				xfloat:right;
+			}
+			div.linktostack > div.details > div.summary {
+				cursor: pointer;
+				display: inline-block;
+			}
+			div.linktostack > div.details > div.summary:before {
+				font-family: monospace;
+				content: '– ';
+			}
+			div.linktostack > div.details:not([open=true]) > div.summary:before {
+				content: '+ ';
+			}
+			div.linktostack > div.details > div.summary:active {
+				text-decoration: underline;
+			}
+			div.linktostack > div.details > div.summary:after {
+				content: attr(data-after);
+			}
+			div.linktostack > div.details > div.detailsinner {
+				display: block;
+
+			}
+			div.linktostack > div.details:not([open=true]) > div.detailsinner {
+				display: none;
+			}
+		</style>
+	</head>
+	<body>
+
+		<h2>HyperCard Pantechnicon Archive</h2>
+
+		<div onclick="if (event.target.nodeName==='A') body.qs('div[id='+event.target.innerText+']').scrollIntoView(); event.preventDefault();">
+			<script>
+				var embedded = (window!==window.top);
+				body.classList.toggle('embedded', embedded);
+				var abc_links = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('').map((l)=>("<a href='" + location.href + "#"+l+"'>"+l+"</a>")).join(' ');
+				document.write(abc_links + ' <span id=listlength></span>');
+			</script>
+		</div>
+		<br>
+
+		<div id=misc></div>
+
+		<script>
+			//"ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('').forEach((l)=>document.write(" <div id="+l+"><b>" + l + "</b><br></div>"));
+			"ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('').forEach((l)=>document.write(" <div id="+l+">" + abc_links + "<br></div>"));
+		</script>
+
+		<template id=linktostack>
+			<div class=linktostack>
+				<div class=details>
+						<div class=summary></div>
+						<a target=_sim>↗</a>
+
+					<div class=detailsinner>
+						<span>loading...</span>
+					</div>
+				</div>
+			</div>
+		</template>
+
+		<template id=innerstack>
+			<modal-dialog class='static nopadding nodrag' name="" visible=true>
+			<stack-part>
+				<card-part class=current bkgndID=1></card-part>
+				<background-part id=1></background-part>
+			</stack-part>
+			</modal-dialog>
+		</template>
+
+		<script>
+
+
+			function addStack(src, toNode)
+			{
+				var lts = linktostack.content.cloneNode(true);
+				lts.qs('div.linktostack').setAttribute('initial', src.split('/').pop().replaceAll('-',' ').trim()[0]);
+				lts.qs('div.summary').innerText = src.split('/').pop().replaceAll('-',' ').trim();
+				if (!embedded)
+					lts.qs('a').href = 'https://hcsimulator.com/Pantechnicon/' + src;
+				else lts.qs('a').parentNode.removeChild(lts.qs('a'));
+
+				lts.qs('div.details').addEventListener('click', function (event) {
+					if (event.target !== this.qs('div.summary')) return;
+
+					if (embedded) {
+						window.top.download_user_stack('Pantechnicon', src);
+						return;
+					}
+
+					this.setAttribute('open', this.open=(this.getAttribute('open')!='true'));
+					if (!this.open && this.qs('stack-part'))
+					{
+						kill_audio();
+						window.speechSynthesis.cancel();
+						answerdialog.visible = false;
+						askdialog.visible = false;
+						this.qs('stack-part').queue().stopAll('Command-Period');
+						this.qs('div.detailsinner').innerHTML = '';
+					}
+					else if (this.open && !this.qs('stack-part'))
+					{
+						var fd = new FormData();
+						fd.append('request', 'load');
+						fd.append('user', 'Pantechnicon');
+						fd.append('path', src);
+
+						var oReq = new XMLHttpRequest();
+						oReq.onload = ()=>{
+							var jsonResponse, jsonStatus;
+							try {
+								jsonStatus = oReq.status;
+								jsonResponse = JSON.parse(oReq.responseText);
+							} catch(e) {
+								jsonResponse = { error: ""+e };
+								jsonStatus = 500;
+							}
+							if (jsonStatus != 200) {
+								alert(oReq.responseText.length + ' bytes: ' + oReq.responseText);
+							}
+							else {
+								console.log(jsonResponse.contents);
+
+								var s = innerstack.content.cloneNode(true), stack = s.qs('stack-part');
+								this.qs('div.detailsinner').innerHTML = '';
+								this.qs('div.detailsinner').appendChild(s);
+								stack.savableJSON = jsonResponse.contents;
+								stack.focus();
+								XTalk.Send(stack.card, 'openStack', [], (proceed)=>{
+									if (proceed)
+										XTalk.Send(stack.card, 'openBackground', [], (proceed)=>{
+											if (proceed)
+												XTalk.Send(stack.card, 'openCard', [], (proceed)=>{
+													stack.lockOpenCardMessages = false;
+												});
+											else stack.lockOpenCardMessages = false;
+										});
+									else stack.lockOpenCardMessages = false;
+								});
+							}
+						};
+						oReq.onprogress = (event) => {
+							this.qs('div.summary').setAttribute('data-after', ' (' + Math.round(event.loaded/1000)+'K)');
+						};
+
+						oReq.open('POST', 'https://hcsimulator.com/file.system/');
+						oReq.send(fd);
+					}
+				});
+				(toNode || body).appendChild(lts);
+			}
+
+			list = list
+				.sort((a,b)=>a.split('/').pop().replaceAll('-',' ').trim().localeCompare(b.split('/').pop().replaceAll('-',' ').trim()));
+
+			var lastname = '', count = 0;
+			list.forEach((f)=>{
+				var name = f.split('/').pop().replaceAll('-',' ').trim();
+				if (name != lastname) {
+					var initial = name[0].toUpperCase();
+					addStack(f, (initial && "ABCDEFGHIJKLMNOPQRSTUVWXYZ".indexOf(initial)!=-1) ? window[initial] : misc);
+					lastname = name;
+					count++;
+				}
+			});
+			listlength.innerText = '(' + count + ' stacks)';
+
+		</script>
+
+	</body>
+</html>
