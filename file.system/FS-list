@@ -1,0 +1,90 @@
+
+<h3>File System Tester</h3>
+<h5>Session: <br />
+<b>Warning</b>:  Undefined global variable $_SESSION in <b>/home/hcsimulator/hcsimulator.com/file-system.php</b> on line <b>494</b><br />
+</h5>
+
+<form method=POST onsubmit="
+	try {
+	cloud.run({ request: this.elements['request'].value, 
+		csrf: this.elements['csrf'].value, 
+		user: this.elements['user'].value, 
+		password: this.elements['password'].value, 
+		newpassword: this.elements['newpassword'].value, 
+		path: this.elements['path'].value,
+		contents: this.elements['contents'].value }); 
+	} catch(e) { throw (e); }
+	return false; ">
+	Request: <input name="request" value="list"> <br>
+	User: <input name="user" value="<br />
+<b>Warning</b>:  Undefined global variable $_SESSION in <b>/home/hcsimulator/hcsimulator.com/file-system.php</b> on line <b>508</b><br />
+<br />
+<b>Warning</b>:  Trying to access array offset on value of type null in <b>/home/hcsimulator/hcsimulator.com/file-system.php</b> on line <b>508</b><br />
+"> <br>
+	Password: <input name="password" value=""> <br>
+	Newpassword: <input name="newpassword" value=""> <br>
+	Path: <input name="path" value="hello"> <br>
+	Contents: <input name="contents" value="{ &quot;wow&quot;: 12345 }" size=50> <br>
+	Csrf: <input name="csrf" value="<br />
+<b>Warning</b>:  Undefined global variable $_SESSION in <b>/home/hcsimulator/hcsimulator.com/file-system.php</b> on line <b>513</b><br />
+<br />
+<b>Warning</b>:  Trying to access array offset on value of type null in <b>/home/hcsimulator/hcsimulator.com/file-system.php</b> on line <b>513</b><br />
+"> <br>
+	<input type=Submit>
+</form>
+
+<script src=element-template.js></script>
+
+<element-template tag=cloud-file-system attributes=src>
+	<template><slot></slot><details open></details></template>
+	<script>
+		function cloud_file_system(element,template)
+		{
+			var details = template.querySelector('details');
+			
+			function run(post,callback)
+			{
+				var formdata = new FormData();
+				for (var k in post) formdata.append(k, post[k]);
+				details.innerText = 'Loading...';
+				fetch(element.src, { method: 'POST', body: formdata }).then(response=>{
+					if (!response.ok)
+						return response.text().then((textResult)=>{ 
+							details.innerText = [response.ok,textResult];
+						});
+					else return response.json().then((jsonResult)=>{ 
+						details.innerText = JSON.stringify(jsonResult);
+						if (callback)
+							callback(jsonResult);
+						});
+					});
+			}
+			return { run };
+		}
+	</script>
+</element-template>
+
+<cloud-file-system id=cloud src=file-system/>
+</cloud-file-system>
+
+<script>
+	cloud.run({user: 'dan', request: 'list', csrf: getCookie('csrf') },
+		(json)=>{cloud.innerHTML = json.map((j)=>"<pre>"+JSON.stringify(j)+"</pre>").join(''); });
+
+function getCookie(cname) {
+	var name = cname + "=";
+	var decodedCookie = decodeURIComponent(document.cookie);
+	var ca = decodedCookie.split(';');
+	for(var i = 0; i <ca.length; i++) {
+		var c = ca[i];
+		while (c.charAt(0) == ' ') {
+			c = c.substring(1);
+		}
+		if (c.indexOf(name) == 0) {
+			return c.substring(name.length, c.length);
+		}
+	}
+	return "";
+}
+
+</script>

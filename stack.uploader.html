@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<meta charset=utf-8><meta name=viewport content='width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover'>
+<style>
+html,body { min-height: 100%; height: 100%; box-sizing: border-box; margin: 0; padding: 4px; }
+body.drag-target #uploadform
+{
+	position: fixed;
+	left: 0px; top: 0px; right: 0px; bottom: 0px;
+	background: #F8F8F8;
+	z-index: 2;
+}
+.attention {
+	animation: attention 1s infinite alternate;
+}
+@keyframes attention {
+  from {color: black;}
+  to {color: blue;}
+}
+</style>
+
+<script>
+var dragtarget = null, showeddragmodal = true;
+setTimeout(()=>{
+	document.body.addEventListener('dragenter', (event) => {
+		if (!event.dataTransfer.types.includes('Files')) return;
+		dragtarget = event.target;
+		document.body.classList.toggle('drag-target', true);
+	});
+	document.body.addEventListener('dragleave', (event) => {
+		if ((event.target === dragtarget || event.target===document))
+			document.body.classList.toggle('drag-target', false);
+	});
+	document.body.addEventListener('drop', (event) => {
+		if ((event.target === dragtarget || event.target===document))
+			document.body.classList.toggle('drag-target', false);
+	});
+}, 1);
+function set_nihongo(value)
+{
+	console.log('set nihongo '+!!value);
+	Array.from(document.forms).forEach((f)=>{ if (f.nihongo) f.nihongo.value = value || ''; });
+}
+</script>
+
+<!--label style='float: right; background: #EEE; border-radius: 6px; padding: 0.25em; position: sticky; top: 8px;'>
+	<input type=checkbox  oninput='set_nihongo(this.checked);'>日本語
+</label-->
+
+	<!--label style='float: right; display: none; background: #EEE; border-radius: 6px; padding: 0.25em;'>
+		<input type=checkbox name=nihongo  oninput="set_nihongo(this.checked);">日本語</label-->
+	<b><font size='+1'> 💾 Import Stack...<br><br></font></b>
+
+	<script>
+		function inspectInput(form)
+		{
+			var size = form.fileToUpload.files[0].size;
+			if (size > 35000000) { output.innerText = "File too large. 35M max please."; return false; }
+			output.innerText = 'Selected ' + Math.round(size/1000) + 'K file.';
+			return true;
+		}
+	</script>
+	<form id=uploadform method="post" enctype="multipart/form-data" style="display: flex; flex-direction: column;" onsubmit="
+		if (!inspectInput(this)) { event.preventDefault(); return false; }
+		if (document.getElementById('importerresults'))
+			importerresults.innerHTML = '';
+		if (document.getElementById('upload_error'))
+			upload_error.innerHTML = '';
+		output.innerHTML += '\n<b class=attention>Now uploading file. Please be patient...</b>';
+		if (window.archivepickerform)
+			window.archivepickerform.parentNode.removeChild(archivepickerform);
+		fileToUpload.scrollIntoView();
+		console.log('Submitting form...');
+		return true;">
+		<input type="hidden" name="nihongo" id="nihongo"  >
+		<div style='text-align: left;'>&nbsp;&nbsp;<code>.dsk</code> , <code>.img</code> , <code>.bin</code> , <code>.sit</code> , <code>.hqx</code> , or raw file:</div>
+		<div style="flex: 1; display: flex; flex-direction: row; align-items: center;">
+			<input type="file" name="fileToUpload" id="fileToUpload" oninput="
+				if (document.readyState!='complete' || !inspectInput(this.form)) return;
+				if (this.form.onsubmit())
+					this.form.submit();
+				" style="padding: 0.5em 0px; border: 0.25em dashed gray; border-radius: 0.5em; flex: 1; align-self: stretch;">
+			<input type="hidden" value="convert" name="convert" id="convert">
+			<input type="submit" value="Upload" name="dosubmit" id="dosubmit">
+		</div>
+	</form>
+	<div id=output style='padding-top: 10vh; padding-bottom: 40vh;'>
+	</div>

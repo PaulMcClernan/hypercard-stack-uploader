@@ -24,8 +24,7 @@
 	<meta name="theme-color" content="#FFFF#FF">
 	<meta name="apple-mobile-web-app-title" content="OXT Community Simulator">
 	<!--base id=base href='https://hcsimulator.com/'-->
-	<!--base id=base href='https://openxtalk.org/WebStacks/'-->
-
+	<!--base id=base href='https://openxtalk.org/WebStacks/' -->
 	<script>
 		var blockLocalStorage = false;
 		if (location.search=='?clean' && confirm('You navigated to /?clean so did you want to delete all cookies?'))
@@ -2754,8 +2753,10 @@ on doMenu what
 		body.qs('#toolbarvert button-part[name="New Field" i]').click();
 	else if what contains "Stack Info" then
 		launch_info_dialog(sim.stack);
-	else if what contains "Import Stack" then
+	else if what contains "Import HC Stack" then
 		importstack.click();
+	else if what contains "Import JSON Stack" then
+		importStackJSON.click();
 	else if what contains "Message" then
 		if (document.getElementById('messagebox-visible')) document.getElementById('messagebox-visible').click();
 	else if what contains "Help" then help
@@ -9328,7 +9329,35 @@ intervalProc@file:///Users/pro/Desktop/HappyCard/XTalk.js:358:24"
 	body.loggedin #loginmodal #loginmodalform_notloggedin { visibility: hidden; position: absolute; }
 </style>
 
+<div style='display:none;'>
+	<form>
+		<input id='inputData' type='file' onchange='readFile()'>
+	</form>
+	<a id='saveData'></a>
+</div>
+<script>
+	<!-- https://codepen.io/clairebaire/pen/KKJrovr -->
+	function readFile() {
+		var inputData = document.getElementById('inputData');
+		inputData.click();
+		var reader = new FileReader();
 
+		reader.addEventListener('load', () => {
+        result = reader.result
+				console.log(reader.result)
+    }, { once: false })
+
+		 reader.onload = function() {
+			 console.log( inputData.files[0].name );
+		};
+	};
+
+	function saveFile(txt, data) {
+		var saveData = document.getElementById('saveData');
+		saveData.setAttribute('download', txt);
+		saveData.setAttribute('href', data);
+	};
+</script>
 
 <script>
 	uploadmodal.addEventListener('closebox', ()=>uploadmodal.visible=false);
@@ -9339,7 +9368,7 @@ intervalProc@file:///Users/pro/Desktop/HappyCard/XTalk.js:358:24"
 		if (!uploadmodal.qs('iframe').src) {
 			//uploadmodal.qs('iframe').onload = ()=>{ uploadmodal.visible = true; }
 			//uploadmodal.qs('iframe').onerror = ()=>{ uploadmodal.visible = true; }
-			uploadmodal.qs('iframe').src = 'stack.uploader';
+			uploadmodal.qs('iframe').src = 'stack.uploader.html';
 			uploadmodal.visible = true;
 		}
 		else uploadmodal.visible = true;
@@ -9718,8 +9747,8 @@ intervalProc@file:///Users/pro/Desktop/HappyCard/XTalk.js:358:24"
 	}
 	#floatmenu:not(.leaveclosed):active > div, #floatmenu:not(.leaveclosed) > div:hover, #floatmenu.leaveopen > div {
 		transition: max-height 0.05s;
-		max-height: calc(95vh - 3em);
-		max-height: calc(95dvh - 3em);
+		max-height: calc(95vh - 1.5em);
+		max-height: calc(95dvh - 1.5em);
 		xmin-height: calc(95dvh - 3em);
 		xmax-height: initial;
 		visibility: visible; opacity: 1;
@@ -9734,6 +9763,7 @@ intervalProc@file:///Users/pro/Desktop/HappyCard/XTalk.js:358:24"
 		xtransition: border 0.25s;
 		animation: border-shake 1s infinite;
 		transition: background 0.5s;
+		float: right;
 	}
 	@keyframes border-shake {
 		0%  { border-color: transparent; }
@@ -9762,7 +9792,6 @@ intervalProc@file:///Users/pro/Desktop/HappyCard/XTalk.js:358:24"
 	}
 	#floatmenu .item.hascheck:before {
 		content: "✓\A0";
-		font-weight: bold;
 		color: transparent;
 	}
 	#floatmenu .item.hascheck.checked:before {
@@ -9782,12 +9811,11 @@ intervalProc@file:///Users/pro/Desktop/HappyCard/XTalk.js:358:24"
 	#floatmenu > div > div:nth-of-type(1) {
 		border-radius: 5px 2px 2px 2px;
 	}
-	#floatmenu .userbubble {
+	/*#floatmenu .userbubble {
 		border: 1px dotted #BBB; margin: -1px; padding: 2px 8px; background: #DDE4; border-radius: 2px 0.5em 2px 2px ;
-	}
+	}*/
 
-	body:not(.loggedin) #floatmenu #publicstacklisttoggle { display: none; }
-	body.hidepublicstacklist.loggedin #floatmenu #publicstacklist { xdisplay: none; height: 0px; overflow: hidden; visibility: hidden; pointer-events: none; }
+	body.hidepublicstacklist #floatmenu #publicstacklist { height: 0px; overflow: hidden; visibility: hidden; pointer-events: none; }
 	#floatmenu #publicstacklisttoggle:before { content: "▼"; color: currentColor; }
 	body.hidepublicstacklist #floatmenu #publicstacklisttoggle:before { transform: rotate(-90deg); }
 
@@ -9796,13 +9824,20 @@ intervalProc@file:///Users/pro/Desktop/HappyCard/XTalk.js:358:24"
 	#floatmenu #accountstacklisttoggle:before { content: "▼"; color: currentColor; }
 	body.hideaccountstacklist #floatmenu #accountstacklisttoggle:before { transform: rotate(-90deg); }
 
-	body.fullscreen #layout { width: 100%; }
-	body.fullscreen #stackcontainer { box-sizing: border-box; xheight: 100vh !important; xoutline: thick solid gray; --override-xy-zero: 0px; padding: 3px 0px 0px 1px; }
-	body.fullscreen #stackcontainer {
-		background: url(ui-icons/watch.png) no-repeat ;
-		background-position: 50vw 50vh;
+	@media (max-height: 342px)
+	{
+		xbody.fullscreen #floatmenu { display: none; }
 	}
-	body:not(.fullscreen) #stackcontainer { padding: var(--layout-padding-top) 0px 0px calc(var(--layout-padding-left) * 2); }
+
+	body.fullscreen #layout { width: 100%; }
+	body.fullscreen #stackcontainer {
+		box-sizing: border-box; xheight: 100vh !important; xoutline: thick solid gray; --override-xy-zero: 0px; padding: 3px 0px 0px 1px;
+		/*background: url(ui-icons/watch.png) no-repeat ;
+		background-position: 50vw 50vh;*/
+	}
+	body:not(.fullscreen) #stackcontainer {
+		padding: var(--layout-padding-top) 0px 0px calc(var(--layout-padding-left) * 2);
+	}
 	body.fullscreen #layout > tbody > tr > td:not(#stackcontainertd) { display: none; }
 	body.fullscreen #referencecontainer { max-height: 0px; overflow: hidden; }
 	xbody.fullscreen #copyright { display: none; }
@@ -9814,32 +9849,19 @@ intervalProc@file:///Users/pro/Desktop/HappyCard/XTalk.js:358:24"
 
 	body #stackcontainer > modal-dialog { position: absolute; }
 
-	#reference { width: 100%; }
-	#reference tr { font: 0.8em Courier; -webkit-user-select: text; user-select: auto; }
-	#reference tr > td { vertical-align: top; padding: 0.25em 6px; word-break: break-word; }
-	#reference tr.bold { font-weight: bold; color: #444; }
-	#reference tr.bold > td { padding-top: 1em; vertical-align: bottom; }
-	#reference tr:not(.bold):not(.notgray):nth-of-type(2n) { background: #DDD3; }
-
-	body #reference tr/*:not(.bold)*/ td:nth-of-type(2) { font-family: Menlo; font-size: 11px; color: #88A; }
-	body:not(.javascript) #reference tr/*:not(.bold)*/ td:nth-of-type(2) { opacity: 0; font-size: 0; }
-
-	#wildcard_script
-		{ white-space: pre-wrap; tab-size: 2; xborder: thin solid gray; margin: 0px; padding: 0px; }
-
 	#scripteditor field-part > div { padding: 0px 4px; line-height: 1.2; }
 
 	field-part.script-indent > div { padding: 0px var(--layout-padding-left); line-height: 1.2; }
 	field-part.script-indent > div:first-of-type { margin-top: 2px; }
 	#wildcard_script > div:nth-of-type(2n+1) { background: #DDD3; }
-	field-part.script-indent > div[data-prefix]:before { content: attr(data-prefix); float: left;  }
+	field-part.script-indent > div[data-prefix]:before { content: attr(data-prefix); float: left; white-space: pre; }
 	field-part.script-indent > div { transition: text-decoration-color 0.5s ease-in 1.5s; }
-
 	field-part.script-indent > div[data-suffix]:not([data-suffix=""]) { text-decoration: underline; text-decoration-color: black; }
+	field-part.script-indent > div[data-border] { outline: 2px solid black; }
 
 	.script-indent > div > * { white-space: initial; }
 
-	body #messagebox.hide-selection ::selection { background: transparent; }
+	body #messagebox.hide-selection ::selection { background: transparent; color: initial; }
 	body #messagebox.hide-selection { caret-color: initial; }
 
 	/*body:not(.javascript) #messagebox_translation, body:not(.javascript) x#messagebox_error { display: none; }*/
@@ -9882,8 +9904,8 @@ intervalProc@file:///Users/pro/Desktop/HappyCard/XTalk.js:358:24"
 		{ margin-top: -1px; }
 
 	#toolbarhelp button-part { box-shadow: none; 0px 1px  1px #bbb, 1px 0px 1px #bbb; }
-	#toolbar > button-part { box-shadow: none; 0px 1px  1px #bbb, 1px 0px 1px #bbb; }
-	#toolbarvert  button-part { box-shadow: none;1px 1px 2px #DDD; }
+	#toolbar > button-part { box-shadow: none; 0px 1px  1px #bbb, 1px 0px 1px #bbb; --background: var(--dark-mode-softwhite, white); }
+	#toolbarvert  button-part { box-shadow: none;1px 1px 2px #DDD; --background: var(--dark-mode-softwhite, white); }
 
 	/* ⌘ ⇧ ⌥ ⌃ */
 	.item[data-shortcut]:after, .item [data-shortcut]:after  { content: "⌘" attr(data-shortcut); color: gray; font: caption; font-weight: bold; margin-left: 1em; visibility: hidden; }
@@ -9894,7 +9916,7 @@ intervalProc@file:///Users/pro/Desktop/HappyCard/XTalk.js:358:24"
 		#editmenustub { display: none; }
 		#floatmenu > div { padding-top: 0.5em; }
 	}
-	x#endstub { position: sticky; bottom: 0px; border-top: 1px dotted gray; padding: 0px; }
+	/*#endstub { position: sticky; bottom: 0px; border-top: 1px dotted gray; padding: 0px; }*/
 </style>
 
 
@@ -9935,14 +9957,14 @@ intervalProc@file:///Users/pro/Desktop/HappyCard/XTalk.js:358:24"
 				clearTimeout(patternz.to); patternz.to = setTimeout(()=>patternz.style.display = 'none', 250);
 				event.preventDefault();
 				" onmouseleave="this.style.display = '';"></div>
-			<script>
-				function patternz_show() {
+	<script>
+		function patternz_show() {
 					clearTimeout(patternz.to); patternz.to = setTimeout(()=>{ patternz.style.display = ''; body.classList.toggle('showpatterns'); }, 250);
 				}
-				function patternz_hide() {
+		function patternz_hide() {
 					clearTimeout(patternz.to); body.classList.remove('showpatterns');
 				}
-			</script>
+	</script>
 		</div>
 		<button-part name="Brush" showName=false icon=ui-icons/brush type=rectangle family=tool onpointerdown="patternz_show();" onmouseleave="patternz_hide();"></button-part>
 		<button-part name="Bucket" showName=false icon=ui-icons/bucket type=rectangle family=tool onpointerdown="patternz_show();" onmouseleave="patternz_hide();"></button-part>
@@ -10155,8 +10177,9 @@ intervalProc@file:///Users/pro/Desktop/HappyCard/XTalk.js:358:24"
 						//launch_info_dialog(stack, false, ()=>{ md.dispatchEvent(new Event('closebox', { bubbles: true })); });
 					});
 				">New Stack...</div>
-				<div class=item id=importstack onclick="showuploadmodal();">Import Stack... </div>
-				<div class=item id=exportstack onclick="exportstack();" style="padding-bottom: 0.5em; border-bottom: thin dotted gray; margin-bottom: 1em;">Export HTML...</div>
+				<div class=item id=importstack onclick="showuploadmodal();">Import HC Stack... </div>
+				<div class=item id=exportstack onclick="exportstack();" style="">Export HTML...</div>
+				<div class=item id=importstack onclick="readFile();">Import JSON... </div>
 				<div class=item id=exportstack onclick="exportJSON();" style="padding-bottom: 0.5em; border-bottom: thin dotted gray; margin-bottom: 1em;">Export JSON...</div>
 				<div id=endstub style="xborder-top: thin dotted gray; margin: -4px; padding: 4px; xbox-shadow: 0px 1px 3px gray; margin-bottom: 2em; xposition: sticky; xbottom: 0px; background: inherit;">
 
@@ -10780,7 +10803,7 @@ end callErrorHandler
 												go next card
 											end mouseUp
 											'> </button-part> </background-part>
-		<card-part name='The First Card' bkgndid=1 cantdelete=true bitmap='data:image/gif;base64,R0lGODdhAASsApEAAAAAAP///wAAAAAAACH5BAkAAAIALAAAAAAABKwCAAL/lI+py+0Po5y02ouz3rz7D4biSJbmiabqyrbuC8fyTNf2jef6zvf+DwwKh8Si8YhMKpfMpvMJjUqn1Kr1is1qt9yu9wsOi8fksvmMTqvX7Lb7DY/L5/S6/Y7P6/f8vv8PGCg4SFhoeIiYqLjI2Oj4CBkpOUlZaXmJmam5ydnp+QkaKjpKWmp6ipqqusra6voKGys7S1tre4ubq7vL2+v7CxwsPExcbHyMnKy8zNzs/AwdLT1NXW19jZ2tvc3d7f0NHi4+Tl5ufo6err7O3u7+Dh8vP09fb3+Pn6+/z9/v/w8woMCBBAsaPIgwocKFDBs6fAgxosSJFCtavIgxo8aN/xw7evwIMqTIkSRLmjyJMqXKlSxpAHgJAALMmC1r2owzUybMmzx7nsn5AKjPoUS9CG1wtKjSpUWSHnCq4CXTqVSJQBVwFYHUqly74ri6dWvUnRHEej2L9gNYmma1ktWZNq7cDG2fsqU51kDdsXvn+v2boG9YvIHv6uwLOHFcwWTrDnYwE7HiyWcZPy6slzDft5Q7p2WcOS9WzZhHez69mHRo06UlX0YNm6dl0q8LuzYcO/fN2aJ5I8WtO/hKx5xXg2bNoLbw5SWJE1/dW7Vd6Myrg3TqHPh05AuUW//OETvtxuOpRwePvqN4s969uzWfPr7F9YTbaz8vP/98zkcHP//n/h6ApelH4EH98XfXf8fdVmCDBQFVm33wGVfcdg5eGBCE2kkoIIXHYQhiPxpSmBl797UmnXshrijPiKz5V9+JAS4oHYs2puNijuSRyJ2KKt4I5Dk6XqYjj0aiGGSS2UTGZJNMehgZj0WORmSMSl55jZNaNgnllF7u2GONWI4pzJZmJojmgUOC+eSLacpIZpy8nLlliW+auGaVX7ooZ5+30IngnuQdaGeVAR45oZ+KwgIonmy+WaiVVD56qJuiLYrpKk7ayel2esLZaaJSboibZJme+smmk4ZqqZs/rmphd6WSiiiqtnKiapsackjopCbiV6muoN5KrCW5Rgkrn57/IhhppbU6amix0lJS57LJpTjrpdbaJR51vIo5bbiFVFtrotE622qzSG47I7jivqvHmcGi6a2kkNkbpoLM+nqiqfD+S4e8scJYL7ra/sptebB22a+7AD+8xrGsIqztkf7eay6+GMcKccdvSLxwmNcC2+EEPmr8m8Eer2wGyGpmK/IFX2787bws3xwxl67GGC3FFcyccrrsxoxz0WEcSzDRQT3aa1ay0kyr0kZP3QXS9Er926cIO13xulujTHXYU1SrrKMHO1zyf6IKGCGya4sNdxNkg1mv2iV3DZ/PXbfda9x+PyEslHkrDFfCygr+dLJXj7zu3443heyng+OdeKTf/9IoedDtPs75D21mzPjkWEOLcre2iZm0yp2vnsPnaWOLbttn953w3hW2azfrut8w5bOSml151u6+qm7sYN+9e/Io9C50wfnCvrS/xPNru8oXK4+9B4cPzSrJiI/q+7mGD1/h9Nmf38H24aPe8MQw2yd+8cJ7j3792tMdsls9t7+z6ktjQDsO2W+AIyjb7RQHPq/tywLX24zN2IY2AkqwLOVTmM+kRz4J6O1/MiPcBD94v9wJbYOU898DNRjBAXEMhCykgOu+5sD8jRBm9NvY2hqoQhG2sIUv/N14Uje0+HGPgzdM4QlXuMMPBq5VJBwYDYkYtF3hS4BYs2ESd7hE8f8xaFvXw2CnAsg/56Hwilh0Gxd9mLQeHnFzyMMPDJ2oPjLK0XUJRJwUL3g8IULNeXiMoxxZSMc2IvF5Z6tbGFfYRSOqsFx/PF8gExk6Gb7xix4UXeEAaEFFNhJugbzWEtX1SB/6T4eai6IolUbKTf6tk7L6JPVe+cAmWpKChXsjHkuoSrHR50NDlF0Oh8XA462xg7jMpS4ruBb6+TKWmiylFwfpwkoa85h3pBPJYERF/fFsiuyLpG+8eUAcTtNjwmpUJnGHv4wBT4zBG2b3fsnLcYbtZVozo+W0VEdE6qx6p4tkMUv5NnnejJ6zUpU2BSbE7CRzkTIsIib/KdCOVTP/mrTbjAj1Ra5fuo9xy2xlBiM60EEd0JML9OhFM5lRZjZRi+x7Jkj/Vc6Rvm5763ydO/kFyRJM8qVTi+kWLXrIijrRevuEogh2ytOQphGZ+Bzfq+yWzZ2B7HtMPKX8UpnUcEnxnQK7p0M1CsHozA2dbNypGhmaVa2KlKvbXBM7V0qpmAEqmiGEHkTT2qetSrKtTIsaO7WZT2w2dYzpC6dd8YoqvcoPqC8znsX6Ssl7jtVkwBwfXRFLLMXC0qRmFCpLM5cnawqSjYeR6V0xmySfrtWpZpJsHv2qOHN2FZqJw2A80YraK6kWiLK9U0lJS0ic9taeox1iDHEpztw6qIcK/+VrRk0X2NUyr7ca0Nc7CatcMjH3h4ESLVvLuk1KfrZR1T1nQ2mZXSWFUqzdfe5g9blQXxKUlYbEblhDltz0Fmi9KJpvUVMKwfhGzb9Oq6kVMSpM/YborLcJ5XYXyk8aQQ3At/UnbhUsJwa3lLgGFa6FRSdhU1L4sFY8LYZvtNv3+RaFCDWvS40qXPrWTp9HbeaJhZPiBHb4Xi1240cvyVoZb/TCdLHxjWNjzhLHeMCR6+YZv4rgana0wj9L8JHTk2SALpmPTT6wivfY3ya7Eq4ckOWVsSzSODZ3uPyzrjNJbNzzDvmmZ8aSlOG05uGC2Lzg/HDzZkxSx9K2zrrlLv9SOTvXKgZPqH6+6aGDaUJCX6i5wCVpls08L0wPWtGPrnKkJT3p9jIVvABWMnDdvMUNgvGh6AX1gkWdHVK/F8jXdLGTVV3S/BZX164+DX9B6UEc3hKs+yMqeANdQJnK18i9/gyH+TpLYXOzkFX961D/fN3CptqqzdZNTUlp4HYqGtlRRTWfPT1I2zK724n5tjTrC2NNA/bPJ/VdQPss7uOyGzzbHZxqPy3uZx5a16R7MZj3zaJ+B1jMv6XsP5dt4kwT967mQ7h8WLnUMefayq3Gtk0RiMofw/jU67a4XDB+tanid9ob6DTmnqjpnHKU4yb3dVHnLViv3jeg9aZxLzf/zFuad1ziXKv5XHY845x7eOeC7Hm0DwnUOReX1nCcuNEBo9mDQru2lTU2QytO8nvr1LeJvjplsm7ZtPv4svysNHo7rQLBZtnsk4mpISfqc2qz+unWlnfLyQ6patO9M3Z/Ht5nSeeOQxW21q6xa4HNyMG3u+E6n54B8S1ocAfbtJt22ZelanXJ+4XRS7c8/njZc83PDm3qBtr+kC76yaMd2GpOobTXvqwGr5u/rk9512OPlsJH/ZVUbnTAYb44j5b52ZEVPPOAX/fOMnXxguZ5QX/vdV7P8PLO9732ob8UhWtd70wXuO8hzfXy3p3JOl4t+An/3+tH3uOm3utj1R3M/3q2f/+Afj/8Ndx824Z++hZd+Fdl+td9/Jdt/hd9EFZ+nAd3D2hhegR6Bfd5rwd4RceAJ2d1uDZvXvZVjmZrM/dgcVVssdVaG4gaI3ZEqvdmqVdBOLdioMd/JzgqQqaCRzdrIVd9RBZuCLZ6DIOAJ2iDVYWDOfgXI9ZRMzdKaMR4Rsh6TeV5NZhmO4iEZ7eD3HdwyPM1SwiFLKYzU5iAKFhqV4iFwkeDRHZZqPd5XBaA50d8F5iB2GeGOoiGSgdwtXRYRWhLJthXRHh9KleHuWE12WZwp8OHT+hHZyR33ueHdhR6g9iADGeIIjd8LNV36ZR+ZChdXdZ9eCiJ3paCTf/4dECETsNmOvATeAkViHP4faHoFbMFZZtnirm3cd9Fb1WYTzdYhbAHi0g2ips2TMtGfXJGbGHoh88HcmD3i7KXhbZXOkxWjBooV8iIgaxYhM0YHHP3ZP0Dch/4gNsGiArIiAzni9q4guSlQJCoij1YYHA4jrkohHOIjt+RaJOlhZvlbm62PkvFi1YjhvXIHPcohXC4fhIHjo/lb534j9ZYkGInkDaXRQ3Dhm6ofMSUdPD4hLKmcxFpHWIYa4vGfhc5gMv4iLQFWjfnkQOpjok3kbxYa1wGcd6Ij9z0iivJgWV3bZYmh7hoVgb5iYCnkP2Hk/bIZr2IjCoFjZWHlM3/d2xLNntFWR1HiZQaR1YOV3pN+Y3dSJA3KZVnmIKX1ooAWHV6VXgECYlU9ZX60ZWiVU9kuX4Z14k9RpPyt5bLVZCeh4AlyWPqKCg1eYR3aZQA6YmhtXfR45fJGJYzKJggIpYphorRiH5UKWu/1pgE8pjmKH1hp4Zcx2aVyXyXiZeudWfQ9XH1J44OCZnvJpqY6Yr0CFYPB2enqJmlyZqt2SC2GXSZWEOxiZh62YElh5vbWJXuN0MRJnKJBJjBOZypdXptuJMo+US4x14oh3jNmZvPuYujc2vDQoGNGGJ5iJ1o9pLc6Y5ReJjjCTAgKZl5t2vN5JXqmVeFSSpW+XWb/0d+kVaM8oli9BmXiihNHphuljhu/Jlw8Sdz7rmf7qmfwmmgbImg6Hmf59l2nRmfDwqh9zedp3l8PVihh4ihr6ah9pZvCnqbEjhyIdqfQ2aB5PhU+GmhdKiiGLKbhneSEbig1geRMxok/7ZyJDiSHnpfP8WjceKjpOePP1eh83ehReqaZlmcVOmCITh1TuqcUAqeUjqlXCh0VoopjciUNbmdVOel6zmDhFmeFFh/ZdpTKEWfmDiG88emZlqdkHWccUp/cwovSheSSSqWFqmnEMOn3JWWUOmfcRao7xKZ4klY2ZioMMVyfreG0PmoiuqIgHoCzFipmSKXmGoCmrqpnP/KcmMaqhI0bKRaqvXjp23moKnapm+4Z66qRMYZmU0qqyujWbXaqreqVLTqhIHJq3Fzh78aicHqN3RZicBqrEWDrOd1jst6TAwTq2kIravUitMKitV6rEnJlZeqrdtqnxi4gN/KMkM4gkRJrq+ahuaWkOlKNb7IN5TqrsyqkiMqePPqOFN2pruKr9Kir0zZr5yUfG/FmAGrrqbZhcVqsILKbeo0sAsbUm7nG9QIsZZKheZasTgTj4ZZpRmrVhPYXePqsXR6fMBDsSO7pyN5eCh7sKe0siwbsf2UdmoKs5Cqb2nKrzVrpLA1qDprNP8ahz5Lr+NXl7YqtBm2dZ16tD//q5hOubS42rRb+bQPk7AxZLRTW2hXKYNY26uwullcy7Crulhgy7BUBapkeyuZI6doOy3imqds27YqRrNw+7F3erV0q17It6N4m1l2ebZ8+6V+K6OAK6ozSbhhG6SHW7bUqrgSda2NS04MCbmOm6STS7maaLlmuoiZW7d3y7lZ27GfK7qjS7qla7qni7qpq7qry7qt67qvC7uxK7uzS7u1a7u3i7u5q7u7y7u967u/C7zBK7zDS7zFa7zHi7zJq7zLy7zN67zPC73RK73TS73Va73Xi73Zq73by73d673fC77hK77jS77la77ni77pq77ry77t677vC7/xK7/zS7/1/2u/94u/+au/+8u//eu//wvAASzAA0zABWzAB4zACazAC8zADezADwzBESzBE0zBFWzBF4zBGazBG8zBHezBHwzCISzCI0zCJWzCJ4zCKazCK8zCLezCLwzDMSzDM0zDNWzDN4zDOazDO8zDPezDPwzEQSzEQ0zERWzER4zESazES8zETezETwzFUSzFU0zFVWzFV4zFWazFW8zFXezFXwzGYSzGY0zGZWzGZ4zGaazGa8zGbezGbwzHcSzHc0zHdWzHd4zHeazHe8zHfezHfwzIgSzIg0zIhWzIh4zIiazIi8zIjezIjwzJkSzJk0zJlWzJl4zJmazJm8zJnezJn/8MyqEsyqNMyqVsyqeMyqmsyqvMyq3syq8My7Esy7NMy7Vsy7eMy7msy7vMy73sy78MzMEszMNMzMVszMeMzMmszMvMzM3szM8MzdEszdNMzdVszdeMzdmszdvMzd3szd8MzuEszuNMzuVszueMzumszuvMzu3szu8Mz/Esz/NMz/Vsz/eMz/msz/vMz/3sz/8M0AEt0ANN0AVt0AeN0Amt0AvN0A3t0A8N0REt0RNN0RVt0ReN0Rmt0RvN0R3t0R8N0iEt0iNN0iVt0ieN0imt0ivN0i3t0i8N0zEt0zNN0zVt0zeN0zmt0zvN0z3t0z8N1EEt1ENN1EVt1EeN1ElHrdRLzdRN7dRPDdVRLdVTTdVVbdVXjdVZrdVbzdVd7dVfDdZhLdZjTdZlbdZnjdZprdZrzdZt7dZvDddxLddzTdd1bdcmUQAAOw==' id=1> <div slot='-1'><div>first background field of first card</div></div> <field-part type=transparent topleft=6,7 width=444 height=128 locktext=true id=1><div><font size='+2' class='' face=Chicago><b>HyperCard Simulator</b></font><br></div><div><br></div><div><font face=Chicago>You can import and run your classic HyperCard stacks.</font><br></div><div><br></div><div><span>Influenced by:</span><br></div><div> <a href='https://hypercard.org'>hypercard.org</a> • <a href='https://itch.io/jam/merveilles-hyperjam'>Merveilles HyperJam</a> • <a href='https://archive.org/details/hypercardstacks'>Internet Archive</a> <br></div><div><br></div> </field-part> <button-part name=Hat icon=16735 topleft=435,-2 width=42 height=36 script='--- drag me with the mouse or finger
+		<card-part name='The First Card' bkgndid=1 cantdelete=true bitmap='data:image/gif;base64,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' id=1> <div slot='-1'><div>first background field of first card</div></div> <field-part type=transparent topleft=6,7 width=444 height=128 locktext=true id=1><div><font size='+2' class='' face=Chicago><b>OXT Simulator</b></font><br></div><div><br></div><div><font face=Chicago>You can import and run your classic HyperCard stacks.</font><br></div><div><br></div><div><span>Influenced by:</span><br></div><div> <a href='https://hypercard.org'>hypercard.org</a> • <a href='https://itch.io/jam/merveilles-hyperjam'>Merveilles HyperJam</a> • <a href='https://archive.org/details/hypercardstacks'>Internet Archive</a> <br></div><div><br></div> </field-part> <button-part name=Hat icon=16735 topleft=435,-2 width=42 height=36 script='--- drag me with the mouse or finger
 	on mouseDown
 
 	repeat while the mouse is down
